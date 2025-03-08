@@ -4,7 +4,8 @@ A new Flutter project.
 SiBakat (Sistem Informasi Bank Jateng Kartu ATM) adalah sebuah aplikasi yang dirancang untuk mengelola data opname stok kartu ATM secara efisien. Aplikasi ini bertujuan untuk mempermudah pencatatan, pemantauan, dan pengelolaan persediaan kartu ATM Bank Jateng Syariah, sehingga memastikan ketersediaan stok tetap terjaga dan terorganisir dengan baik.
 
 <br>
-Prototype By [@andikariskys](https://github.com/andikariskys)
+Prototype by [@andikariskys](https://github.com/andikariskys)
+
 
 <br>
 <img width="428" alt="Edit Personal Info" src="https://github.com/user-attachments/assets/73bb6300-7711-4f46-b6e0-6f1a25e34f1e" />
