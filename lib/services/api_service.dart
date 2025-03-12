@@ -19,17 +19,17 @@ class ApiService {
       // Ambil token dari response
       String token = responseData['token'];
 
-      // Cetak token ke log
-      debugPrint("Token diterima: $token");
-
-      // Simpan token ke SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-
-      // Ambil data user dari key "data"
+      // Ambil data user dari response
       final userData = responseData['data'];
 
       if (userData != null) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('name', userData['name']); // Simpan nama user
+
+        // Cetak nama untuk debug
+        debugPrint("Nama user disimpan: ${userData['name']}");
+
         return User(
           id: userData['id'],
           name: userData['name'],
@@ -41,6 +41,32 @@ class ApiService {
     }
     return null;
   }
+
+  //*function get all atm
+  Future<List<dynamic>> fetchATMs() async {
+    String? token = await getToken();
+    if (token == null) {
+      debugPrint("Token tidak ditemukan, pengguna harus login kembali.");
+      return [];
+    }
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/atm"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      return responseData['data'];
+    } else {
+      debugPrint("Gagal mengambil data ATM: ${response.body}");
+      return [];
+    }
+  }
+
 
   // Fungsi untuk mendapatkan token dari SharedPreferences
   Future<String?> getToken() async {
