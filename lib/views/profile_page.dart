@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sibakat/views/dashboard_page.dart';
 import 'package:sibakat/views/auth/login_page.dart';
 import 'package:sibakat/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -38,6 +39,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _logout() async {
     await ApiService().logout(); // Panggil logout dari ApiService
+    
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstTimeLogin', true); // Set agar popup muncul setelah login lagi
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -78,18 +82,21 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             SizedBox(height: 30),
             Center(
-              child: ElevatedButton(
-                onPressed: _logout, // Fungsi logout sudah async
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                width: double.infinity, // Lebar penuh mengikuti menu sebelumnya
+                child: ElevatedButton(
+                  onPressed: _logout, // Fungsi logout sudah async
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: EdgeInsets.symmetric(vertical: 16), // Hapus horizontal agar otomatis
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                child: Text(
-                  "Keluar",
-                  style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                  child: Text(
+                    "Keluar",
+                    style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
