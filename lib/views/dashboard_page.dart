@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
@@ -159,12 +158,16 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                           ),
                          SizedBox(height: 20),
-                         Text(
-                            "Daftar Pembuatan Kartu",
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.left, // Pastikan teks rata kiri
+                         Container(
+                            width: double.infinity, // Pastikan Container melebar penuh
+                            alignment: Alignment.centerLeft, // Paksa konten berada di kiri
+                            margin: EdgeInsets.only(top: 20), // Tambahkan margin agar terpisah dari elemen sebelumnya
+                            child: Text(
+                              "Daftar Pembuatan Kartu",
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
                           ),
-                          SizedBox(height: 10),
+
                           ListView.builder(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
