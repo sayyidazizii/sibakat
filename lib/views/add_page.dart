@@ -1,7 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
+import 'profile_page.dart';
+import 'dashboard_page.dart';
 
-class AddPage extends StatelessWidget {
+class AddPage extends StatefulWidget {
+  @override
+  _AddPageState createState() => _AddPageState();
+}
+
+class _AddPageState extends State<AddPage> {
+  int _currentIndex = 1; // Set default index ke AddPage
+
+  void _onItemTapped(int index) {
+    if (index == _currentIndex) return; // Hindari navigasi ulang ke halaman yang sama
+
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => DashboardPage()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfilePage()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +45,7 @@ class AddPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20),
-            
+
             buildInputField("No. ATM", "1234xxxx5678xxxx9012"),
             buildInputField("No. Rekening", "12345xxxxx"),
             buildInputField("Nama Lengkap", "Utami xxxxxx", isBold: true),
@@ -28,7 +53,7 @@ class AddPage extends StatelessWidget {
             buildInputField("Saldo", "770.000"),
 
             SizedBox(height: 20),
-            
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -47,7 +72,7 @@ class AddPage extends StatelessWidget {
           ],
         ),
       ),
-      
+
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         notchMargin: 10,
@@ -55,16 +80,27 @@ class AddPage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(icon: Icon(Icons.home), onPressed: () {}),
-            SizedBox(width: 40),
-            IconButton(icon: Icon(Icons.person), onPressed: () {}),
+            IconButton(
+              icon: Icon(LineIcons.home,
+                  size: 30,
+                  color: _currentIndex == 0 ? Color(0xFF1E40AF) : Colors.black),
+              onPressed: () => _onItemTapped(0),
+            ),
+
+            IconButton(
+              icon: Icon(LineIcons.userCircle,
+                  size: 30,
+                  color: _currentIndex == 2 ? Color(0xFF1E40AF) : Colors.black),
+              onPressed: () => _onItemTapped(2),
+            ),
           ],
         ),
       ),
+
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color(0xFF1E40AF),
-        child: Icon(LineIcons.plus, size: 30, color: Colors.white),
-        onPressed: () {},
+        child: Icon(LineIcons.plusCircle, size: 30, color: Colors.white),
+        onPressed: () {}, // Tidak perlu navigasi karena sudah di halaman ini
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
