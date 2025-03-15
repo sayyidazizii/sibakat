@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:sibakat/views/add_page.dart';
 import 'package:sibakat/views/dashboard_page.dart';
 import 'package:sibakat/views/auth/login_page.dart';
 import 'package:sibakat/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:line_icons/line_icons.dart';
+
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -10,19 +13,22 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  int _selectedIndex = 2;
+  int _selectedIndex = 2; // Tetapkan index default ke halaman profil
 
   void _onItemTapped(int index) {
-    if (index == _selectedIndex) return;
+    if (index == _selectedIndex) return; // Hindari navigasi ulang ke halaman yang sama
 
     Widget nextPage;
     switch (index) {
       case 0:
         nextPage = DashboardPage();
         break;
-      case 2:
-        nextPage = ProfilePage();
+      case 1:
+        // Tambah halaman tambah kartu jika ada
+        nextPage = AddPage();
         break;
+      case 2:
+        return;
       default:
         return;
     }
@@ -31,22 +37,18 @@ class _ProfilePageState extends State<ProfilePage> {
       context,
       MaterialPageRoute(builder: (context) => nextPage),
     );
-
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   Future<void> _logout() async {
-    await ApiService().logout(); // Panggil logout dari ApiService
-    
+    await ApiService().logout(); // Logout dari API
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isFirstTimeLogin', true); // Set agar popup muncul setelah login lagi
 
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -83,12 +85,12 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 30),
             Center(
               child: SizedBox(
-                width: double.infinity, // Lebar penuh mengikuti menu sebelumnya
+                width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _logout, // Fungsi logout sudah async
+                  onPressed: _logout,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
-                    padding: EdgeInsets.symmetric(vertical: 16), // Hapus horizontal agar otomatis
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -103,16 +105,41 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Color(0xFF1A3E92),
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Tambah'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-      ),
+
+      bottomNavigationBar: BottomAppBar(
+          shape: CircularNotchedRectangle(),
+          notchMargin: 10,
+          color: Color(0xFFB0C4FF),
+          child: Row(
+            children: [
+              Expanded(
+                child: IconButton(
+                  icon: Icon(LineIcons.home,
+                      color: _selectedIndex == 0 ? Color(0xFF1A3E92) : Colors.black),
+                  onPressed: () => _onItemTapped(0),
+                ),
+              ),
+              Expanded(
+                child: IconButton(
+                  icon: Icon(LineIcons.plusCircle,
+                      size: 30, // Ukuran lebih besar agar menonjol
+                      color: _selectedIndex == 1 ? Color(0xFF1A3E92) : Colors.black),
+                  onPressed: () => _onItemTapped(1),
+                ),
+              ),
+              Expanded(child: SizedBox()), // Spacer agar ikon Plus tetap di tengah
+            ],
+          ),
+        ),
+
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Color(0xFF1A3E92),
+          child: Icon(LineIcons.userCircle, size: 28, color: Colors.white),
+          onPressed: () {}, // Bisa digunakan untuk fitur lain
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+
+
     );
   }
 
