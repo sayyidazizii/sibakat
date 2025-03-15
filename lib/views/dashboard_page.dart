@@ -81,18 +81,24 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  // **Fungsi Navigasi**
+  // **Perbaiki Fungsi Navigasi**
   void _onItemTapped(int index) {
-    if (index == 0) {
-      // Tetap di Dashboard
-    } else if (index == 1) {
-      // Navigasi ke halaman tambah kartu (jika ada)
+    setState(() {
+      _currentIndex = index;
+    });
+
+    if (index == 1) {
+
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => AddPage()), // Gantilah dengan halaman yang sesuai
-      );
+        MaterialPageRoute(builder: (context) => AddPage()),
+      ).then((_) {
+        setState(() {
+          _currentIndex = 0; // Kembali ke Home setelah selesai di halaman tambah
+        });
+      });
     } else if (index == 2) {
-      // Navigasi ke halaman profil
+
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ProfilePage()),
@@ -184,7 +190,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 padding: EdgeInsets.all(12),
                                 child: Row(
                                   children: [
-                                    Icon(LineIcons.creditCard, color: Colors.blue),
+                                    Icon(LineIcons.creditCard, color: Colors.black),
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Column(
@@ -203,6 +209,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                         ],
                                       ),
                                     ),
+                                    
                                     Container(
                                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
@@ -216,7 +223,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ),
                                     SizedBox(width: 10),
                                     IconButton(
-                                      icon: Icon(Icons.delete, color: Colors.blue),
+                                      icon: Icon(LineIcons.trash, color: Colors.black),
                                       onPressed: () {
                                         // Tambahkan fungsi hapus nanti
                                       },
@@ -234,28 +241,44 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
           ),
+          
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: Color(0xFF3454D1),
-        backgroundColor: Color(0xFFD0E1FF),
-        onTap: _onItemTapped, // Tambahkan fungsi ini
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: "Tambah",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profil",
-          ),
-        ],
+      bottomNavigationBar: BottomAppBar(
+        shape: CircularNotchedRectangle(),
+        notchMargin: 10,
+        color: Color(0xFFB0C4FF),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround, // Rapi di tengah
+          children: [
+            SizedBox(width: _currentIndex == 0 ? 50 : 0), // Beri jarak saat Home di kiri
+            IconButton(
+              icon: Icon(LineIcons.plusCircle,
+                  size: 30,
+                  color: _currentIndex == 1 ? Color(0xFF1E40AF) : Colors.black),
+              onPressed: () => _onItemTapped(1),
+            ),
+            IconButton(
+              icon: Icon(LineIcons.userCircle,
+                  size: 30,
+                  color: _currentIndex == 2 ? Color(0xFF1E40AF) : Colors.black),
+              onPressed: () => _onItemTapped(2),
+            ),
+          ],
+        ),
       ),
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xFF1E40AF),
+        child: Icon(LineIcons.home, size: 30, color: Colors.white),
+        onPressed: () => _onItemTapped(0), // Pastikan ini untuk Home
+      ),
+
+      floatingActionButtonLocation: _currentIndex == 0
+          ? FloatingActionButtonLocation.startDocked
+          : _currentIndex == 1
+              ? FloatingActionButtonLocation.centerDocked
+              : FloatingActionButtonLocation.endDocked,
     );
   }
 }
