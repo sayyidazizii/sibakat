@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import 'profile_page.dart'; // Import halaman profil
 import 'add_page.dart'; // Import halaman tambah kartu jika ada
+import 'edit_atm_page.dart';
+
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -106,6 +108,71 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  Future<bool> _showDeleteConfirmation() async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Hapus Data",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "Apakah anda yakin ingin menghapus?",
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[300],
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text("Tidak", style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[400],
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text("Ya", style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ) ?? false;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -174,13 +241,23 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                           ),
 
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) {
-                              var atm = snapshot.data![index];
-                              return Container(
+                         ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            var atm = snapshot.data![index];
+                            return InkWell(
+                              onTap: () {
+                                // Navigasi ke EditATMPage saat item diklik
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditATMPage(atmId: atm["id"]),
+                                  ),
+                                );
+                              },
+                              child: Container(
                                 decoration: BoxDecoration(
                                   color: Color(0xFFD0E1FF),
                                   borderRadius: BorderRadius.circular(16),
@@ -196,7 +273,10 @@ class _DashboardPageState extends State<DashboardPage> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(atm["card_name"] ?? "Tanpa Nama", style: TextStyle(fontWeight: FontWeight.bold)),
+                                          Text(
+                                            atm["card_name"] ?? "Tanpa Nama",
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
                                           SizedBox(height: 4),
                                           Container(
                                             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -204,12 +284,14 @@ class _DashboardPageState extends State<DashboardPage> {
                                               color: Colors.white,
                                               borderRadius: BorderRadius.circular(12),
                                             ),
-                                            child: Text("Rek. ${atm["account_number"] ?? "Tidak Ada"}", style: TextStyle(fontSize: 12)),
+                                            child: Text(
+                                              "Rek. ${atm["account_number"] ?? "Tidak Ada"}",
+                                              style: TextStyle(fontSize: 12),
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    
                                     Container(
                                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
@@ -224,15 +306,22 @@ class _DashboardPageState extends State<DashboardPage> {
                                     SizedBox(width: 10),
                                     IconButton(
                                       icon: Icon(LineIcons.trash, color: Colors.black),
-                                      onPressed: () {
-                                        // Tambahkan fungsi hapus nanti
+                                      onPressed: () async {
+                                        bool confirmDelete = await _showDeleteConfirmation();
+                                        if (confirmDelete) {
+                                          String message = await apiService.deleteATM(atm["id"]);
+                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+                                          setState(() {}); // Refresh daftar ATM
+                                        }
                                       },
                                     ),
                                   ],
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
+                        ),
+
                         ],
                       );
                     }
