@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
+import '../services/api_service.dart';
 import 'profile_page.dart';
 import 'dashboard_page.dart';
 
@@ -9,21 +10,54 @@ class AddPage extends StatefulWidget {
 }
 
 class _AddPageState extends State<AddPage> {
-  int _currentIndex = 1; // Set default index ke AddPage
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController cardNumberController = TextEditingController();
+  final TextEditingController accountNumberController = TextEditingController();
+  final TextEditingController cardNameController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController balanceController = TextEditingController();
+  bool _isLoading = false; // Untuk menampilkan indikator loading
+
+  int _currentIndex = 1;
+  final ApiService apiService = ApiService();
 
   void _onItemTapped(int index) {
-    if (index == _currentIndex) return; // Hindari navigasi ulang ke halaman yang sama
-
+    if (index == _currentIndex) return;
     if (index == 0) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardPage()),
-      );
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardPage()));
     } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ProfilePage()),
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+    }
+  }
+
+  void _submitATM() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      String response = await apiService.addATM(
+        cardNumberController.text,
+        accountNumberController.text,
+        cardNameController.text,
+        addressController.text,
+        balanceController.text,
       );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response),
+          backgroundColor: response.contains("berhasil") ? Colors.green : Colors.red,
+        ),
+      );
+
+      if (response.contains("berhasil")) {
+        Navigator.pop(context); // Kembali ke halaman sebelumnya jika sukses
+      }
     }
   }
 
@@ -33,46 +67,41 @@ class _AddPageState extends State<AddPage> {
       backgroundColor: Color(0xFFF8FAFF),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Tambah Kartu",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E40AF),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Tambah Kartu",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E40AF)),
               ),
-            ),
-            SizedBox(height: 20),
-
-            buildInputField("No. ATM", "1234xxxx5678xxxx9012"),
-            buildInputField("No. Rekening", "12345xxxxx"),
-            buildInputField("Nama Lengkap", "Utami xxxxxx", isBold: true),
-            buildInputField("Alamat", "Jl. Lompo Batang Timur xxxxx", isBold: true),
-            buildInputField("Saldo", "770.000"),
-
-            SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF1E40AF),
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              SizedBox(height: 20),
+              buildInputField("No. ATM", cardNumberController, length: 16),
+              buildInputField("No. Rekening", accountNumberController, length: 10),
+              buildInputField("Nama Lengkap", cardNameController),
+              buildInputField("Alamat", addressController),
+              buildInputField("Saldo", balanceController, isNumber: true),
+              SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF1E40AF),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
+                  onPressed: _isLoading ? null : _submitATM, // Disable button saat loading
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text("Simpan", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
-                onPressed: () {},
-                child: Text("Simpan", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         notchMargin: 10,
@@ -81,53 +110,52 @@ class _AddPageState extends State<AddPage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              icon: Icon(LineIcons.home,
-                  size: 30,
-                  color: _currentIndex == 0 ? Color(0xFF1E40AF) : Colors.black),
+              icon: Icon(LineIcons.home, size: 30, color: _currentIndex == 0 ? Color(0xFF1E40AF) : Colors.black),
               onPressed: () => _onItemTapped(0),
             ),
-
             IconButton(
-              icon: Icon(LineIcons.userCircle,
-                  size: 30,
-                  color: _currentIndex == 2 ? Color(0xFF1E40AF) : Colors.black),
+              icon: Icon(LineIcons.userCircle, size: 30, color: _currentIndex == 2 ? Color(0xFF1E40AF) : Colors.black),
               onPressed: () => _onItemTapped(2),
             ),
           ],
         ),
       ),
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color(0xFF1E40AF),
         child: Icon(LineIcons.plusCircle, size: 30, color: Colors.white),
-        onPressed: () {}, // Tidak perlu navigasi karena sudah di halaman ini
+        onPressed: () {},
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget buildInputField(String label, String value, {bool isBold = false}) {
+  Widget buildInputField(String label, TextEditingController controller, {bool isNumber = false, int? length}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         SizedBox(height: 6),
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Color(0xFFF0F4FF),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Color(0xFF1E40AF), width: 1.5),
-          ),
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: Colors.black54,
+        TextFormField(
+          controller: controller,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          maxLength: length,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Color(0xFFF0F4FF),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Color(0xFF1E40AF), width: 1.5),
             ),
           ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "$label tidak boleh kosong";
+            }
+            if (length != null && value.length != length) {
+              return "$label harus $length digit";
+            }
+            return null;
+          },
         ),
         SizedBox(height: 14),
       ],
