@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 
 class ApiService {
-  static const String baseUrl = "https://sibakat.andikariskys.my.id/api";
+  static const String baseUrl = "https://si-bakat.andikariskys.my.id/api";
 
   Future<User?> login(String email, String password) async {
     final response = await http.post(
